@@ -10,11 +10,11 @@ from webdriver_manager.chrome import ChromeDriverManager
 chrome_options = Options()
 chrome_options.add_experimental_option("detach",True)
 chrome_options.add_experimental_option("excludeSwitches",["enable-logging"])
+chrome_options.add_argument("--force-device-scale-factor=1")
 
 KEYWORD = "buy domain"
 
 browser = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-
 browser.get("https://google.com")
 
 
@@ -23,16 +23,17 @@ search_bar = browser.find_element(By.CLASS_NAME,"gLFyf")
 search_bar.send_keys(KEYWORD)
 search_bar.send_keys(Keys.ENTER)
 
-search_results = browser.find_elements(By.CSS_SELECTOR,".MjjYud")
+shitty_elements = WebDriverWait(browser, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME,"Wt5Tfe")))
 
-shitty_element = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.CLASS_NAME,"Wt5Tfe")))
+for shitty_element in shitty_elements:
+    browser.execute_script(
+        """
+        const shitty = arguments[0]
+        shitty.parentElement.removeChild(shitty)
+        """
+    ,shitty_element)
 
-print(shitty_element)
+search_results = browser.find_elements(By.CLASS_NAME,"g")
 
-# for index, search_result in enumerate(search_results):
-#     class_name = search_result.get_attribute("class")
-#     print(class_name)
-#     if "ULSxyf" not in class_name:
-#         capture = search_result.screenshot(f"screenshots/{KEYWORD}{index}.png")
-    
-browser.close()
+for index, search_result in enumerate(search_results):
+    search_result.screenshot(f"screenshots/{index}.png")
